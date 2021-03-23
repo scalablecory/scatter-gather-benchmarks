@@ -144,6 +144,7 @@ namespace ScatterGatherTests
         private async ValueTask RunBenchmarkAsync(string remoteHost, string name, Func<ValueTask> asyncFunc)
         {
             using var socket = new Socket(SocketType.Stream, ProtocolType.Tcp);
+            socket.NoDelay = true;
 
             await socket.ConnectAsync(IPEndPoint.Parse(remoteHost)).ConfigureAwait(false);
 
@@ -434,6 +435,8 @@ namespace ScatterGatherTests
         }
     }
 
+    // The only other way to get gathered writes returns a Task, and allocations are impacting numbers.
+    // This is here to represent the numbers we'll get if we add a proper ValueTask-returning gather API to Stream.
     sealed class ValueTaskSocketAsyncEventArgs : SocketAsyncEventArgs, IValueTaskSource<int>
     {
         ManualResetValueTaskSourceCore<int> _taskSource;
